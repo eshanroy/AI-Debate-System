@@ -1,6 +1,0 @@
-streamlit
-langchain
-langchain-groq
-chromadb
-python-dotenv
-pyttsx3
