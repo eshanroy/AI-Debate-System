@@ -34,20 +34,22 @@ if st.button("Start Debate") and topic:
         last_a = state["history"].split("A:")[-1].strip()
 
         st.text_area(
-            "🅰️ Debater A",
-            value=last_a,
-            height=150
-        )
+    "🅰️ Debater A",
+    value=last_a,
+    height=150,
+    key="debater_a_output"
+)
 
         # Debater B
         state = debater_b(state)
         last_b = state["history"].split("B:")[-1].strip()
 
         st.text_area(
-            "🅱️ Debater B",
-            value=last_b,
-            height=150
-        )
+    "🅱️ Debater B",
+    value=last_b,
+    height=150,
+    key="debater_b_output"
+)
 
         st.markdown("---")
 
