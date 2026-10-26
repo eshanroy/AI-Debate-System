@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 
 from agents.debater_a import debater_a
@@ -14,22 +13,21 @@ st.set_page_config(
 st.title("🧠 AI Debate System")
 st.write("Multi-Agent Debate with Memory (Groq + LangChain)")
 
-# Debate topic input
 topic = st.text_input(
     "🎯 Enter Debate Topic",
     placeholder="Example: Magnus Carlsen is the best chess player"
 )
 
-# Start debate
 if st.button("Start Debate", type="primary"):
-
     if not topic.strip():
-        st.warning("Please enter a debate topic before starting.")
+        st.warning("Please enter a debate topic.")
     else:
         state = {
             "topic": topic.strip(),
             "history": "",
-            "result": ""
+            "result": "",
+            "round_arguments": {},
+            "current_round": 1
         }
 
         rounds = 3
@@ -38,67 +36,45 @@ if st.button("Start Debate", type="primary"):
         st.markdown("---")
 
         try:
-            # Run the debate
             for i in range(rounds):
                 round_number = i + 1
+                state["current_round"] = round_number
 
                 st.subheader(f"🔁 Round {round_number}")
 
-                # Debater A
                 with st.spinner(
                     f"Debater A is preparing Round {round_number}..."
                 ):
                     state = debater_a(state)
 
-                history_after_a = state.get("history", "")
-                last_a = history_after_a.split("A:")[-1].strip()
+                last_a = state["round_arguments"][round_number]["A"]
 
-                st.text_area(
-                    "🅰️ Debater A",
-                    value=last_a,
-                    height=150,
-                    key=f"debater_a_output_{round_number}",
-                    disabled=True
-                )
+                st.markdown("**🅰️ Debater A**")
+                st.markdown(last_a)
 
-                # Debater B
                 with st.spinner(
                     f"Debater B is preparing Round {round_number}..."
                 ):
                     state = debater_b(state)
 
-                history_after_b = state.get("history", "")
-                last_b = history_after_b.split("B:")[-1].strip()
+                last_b = state["round_arguments"][round_number]["B"]
 
-                st.text_area(
-                    "🅱️ Debater B",
-                    value=last_b,
-                    height=150,
-                    key=f"debater_b_output_{round_number}",
-                    disabled=True
-                )
+                st.markdown("**🅱️ Debater B**")
+                st.markdown(last_b)
 
                 st.markdown("---")
 
-            # Final judgment
             st.subheader("⚖️ Final Judgment")
 
             with st.spinner("The judge is evaluating the debate..."):
                 state = judge(state)
 
-            st.text_area(
-                "📜 Judge Decision",
-                value=state.get("result", "No decision was returned."),
-                height=300,
-                key="judge_decision_output",
-                disabled=True
+            st.markdown(
+                state.get("result", "The judge did not return a verdict.")
             )
 
             st.success("Debate completed successfully!")
 
         except Exception as e:
-            st.error(
-                "The debate could not be completed. "
-                "Check the Render logs for the underlying error."
-            )
+            st.error("The debate stopped because an agent or the judge failed.")
             st.exception(e)
